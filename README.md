@@ -41,6 +41,9 @@ bundle install
 
 - 上記コマンドで何もエラーが表示されなければOKです
 
+### Chromeドライバの追加 (WinddowsでChromeを使用する場合)
+chromedriver.exe をRubyインストールディレクトリのbin(ex C:¥Ruby21-x64¥bin)にコピーします。
+
 セットアップは以上で終了です。お疲れさまでした。
 
 ## 実行方法
@@ -48,12 +51,22 @@ bundle install
 ### ASINの設定
 asin.txtにデータを取得するASINを記載します。
 
-### CSVに出力する場合
+### FirefoxでCSVに出力する場合
 ```
 ruby scrape_mnrate.rb
 ```
 
-### Excelに出力する場合
+### ChromeでCSVに出力する場合
 ```
-ruby scrape_mnrate.rb excel
+ruby scrape_mnrate.rb chrome
+```
+
+### FirefoxでExcelに出力する場合
+```
+ruby scrape_mnrate.rb firefox excel
+```
+
+### FirefoxでChromeに出力する場合
+```
+ruby scrape_mnrate.rb chrome excel
 ```

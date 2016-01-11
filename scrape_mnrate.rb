@@ -230,7 +230,8 @@ end
 logger = MultiLogger.new("#{log_dir}/scrape_mnrate.log", 10)
 logger.info "============= scrape_mnrate started!! ============="
 
-browser = Browser.new :firefox
+app = ARGV[0].nil? ? :firefox : :chrome
+browser = Browser.new app
 
 in_str = open("#{__dir__}/asin.txt") { |f| f.read.chomp }
 result = {
@@ -242,7 +243,7 @@ in_str.split(/\n/).each do |line|
   asin = line.chomp
   begin
     hist_data = get_hist_data(browser, asin)
-    if ARGV[0] == 'excel'
+    if ARGV[1] == 'excel'
       out_file = "#{out_dir}/#{asin}.xlsx"
       write_to_excel(asin, hist_data, out_file)
     else
