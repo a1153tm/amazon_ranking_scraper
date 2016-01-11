@@ -8,7 +8,7 @@ require 'logger'
 class Browser
   def initialize(app)
     @app = app
-    @max_try = 5
+    @max_try = 1
     @interval = 10
     new_driver()
   end
@@ -115,27 +115,38 @@ def page_not_found?(driver)
 end
 
 def get_hist_graph_data(driver)
-  table = driver.find_element(:id, 'sheet_contents')
-  tbody = table.find_element('tag_name', 'tbody')
-  hist_rows = tbody.find_elements(:tag_name, 'tr')
-  
-  hist_items = []
-  hist_rows.each do |hist_row|
-    survey_date = get_col_text(hist_row, 'w_res')
-    next if survey_date.empty?
+  driver.find_element(:id, 'sheet_contents')
+    .find_element('tag_name', 'tbody')
+    .find_elements(:tag_name, 'tr')
 
+  script = <<EOS
+  var rows = document.querySelectorAll('#sheet_contents tbody tr');
+  var items = [];
+  for (var i = 0; i < rows.length; i++){
+    var item = {};
+    ['w_res', 'w_ran', 'w_tnew', 'w_tuse', 'w_new', 'w_tuse', 'w_tcol', 'w_col'].forEach(function(klass) {
+      var value = rows[i].querySelector('.' + klass).querySelector('span').textContent;
+      item[klass] = value;
+    });
+    items.push(item);
+  }
+  return items;
+EOS
+
+  rows = driver.execute_script script
+  return rows.map do |row|
     item = HistItem.new
-    item.survey_date = survey_date
-    item.ranking = get_col_text(hist_row, 'w_ran')
-    item.new_sell_price.num_of_sellers = get_col_text(hist_row, 'w_tnew')
-    item.new_sell_price.lowest_price = get_col_text(hist_row, 'w_new')
-    item.used_sell_price.num_of_sellers = get_col_text(hist_row, 'w_tuse')
-    item.used_sell_price.lowest_price = get_col_text(hist_row, 'w_use')
-    item.coll_sell_price.num_of_sellers = get_col_text(hist_row, 'w_tcol')
-    item.coll_sell_price.lowest_price = get_col_text(hist_row, 'w_col')
-    hist_items << item
+    item.survey_date = row['w_res'].sub(/^＞/, '')
+    item.ranking = row['w_ran']
+    item.new_sell_price.num_of_sellers = row['w_tnew']
+    item.new_sell_price.lowest_price = row['w_new']
+    item.used_sell_price.num_of_sellers = row['w_tuse']
+    item.used_sell_price.lowest_price = row['w_use']
+    item.coll_sell_price.num_of_sellers = row['w_tcol']
+    item.coll_sell_price.lowest_price = row['w_col']
+    item
   end
-  hist_items
+  #hist_items
 end
 
 def get_col_text(hist_row, _class)
@@ -256,5 +267,5 @@ end
 
 browser.quit
 
-logger.info "============= scrape_mnrate finished!! ============="
+logger.info "============= scrape_mnrate finished!! ============"
 logger.info result
