@@ -14,13 +14,13 @@
 ### アプリケーションのダウンロード
 
 - 以下サイトにアクセスします
--- https://github.com/a1153tm/amazon_ranking_scraper
+ - https://github.com/a1153tm/amazon_ranking_scraper
 
 - [Download ZIP]ボタンをクリックします
--- amazon_ranking_scraperのファイル一式がダウンロードされます
+ - amazon_ranking_scraperのファイル一式がダウンロードされます
 
 - ダウンロードしたZIPファイルを任意のフォルダに展開します
--- 以下このフォルダを"インストールフォルダ"と記載します
+ - 以下このフォルダを"インストールフォルダ"と記載します
 
 ### 必要ライブラリのインストール
 
