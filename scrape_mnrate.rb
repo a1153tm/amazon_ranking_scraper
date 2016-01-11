@@ -1,6 +1,7 @@
 # coding: utf-8
 
 require 'axlsx'
+require 'csv'
 require 'selenium-webdriver'
 require 'logger'
  
@@ -53,6 +54,19 @@ class HistItem
     @new_sell_price = SellerAndPrice.new
     @used_sell_price = SellerAndPrice.new
     @coll_sell_price = SellerAndPrice.new
+  end
+
+  def to_array
+    [
+      @survey_date,
+      @ranking,
+      @new_sell_price.num_of_sellers,
+      @new_sell_price.lowest_price,
+      @used_sell_price.num_of_sellers,
+      @used_sell_price.lowest_price,
+      @coll_sell_price.num_of_sellers,
+      @coll_sell_price.lowest_price
+    ]
   end
 end
 
@@ -128,47 +142,58 @@ def get_col_text(hist_row, _class)
   hist_row.find_element(:class, _class).find_element(:tag_name, 'span').text.chomp.strip
 end
 
+def write_to_csv(asin, hist_items, out_file)
+  CSV.open(out_file, 'w') do |csv|
+    header.each do |row|
+      csv << row
+    end
+     
+    hist_items.each do |item|
+      csv << item.to_array
+    end
+  end
+end
+
 def write_to_excel(asin, hist_items, out_file)
   package = Axlsx::Package.new                             
   sheet = package.workbook.add_worksheet(name: asin)
 
   # header
-  sheet.add_row([
-    'survey_date',
-    'ranking',
-    'new',
-    '',
-    'uesed',
-    '',
-    'collectible',
-    ''
-  ])
-  sheet.add_row([
-    '',
-    '',
-    'number_of_sellers',
-    'the_lowest_price',
-    'number_of_sellers',
-    'the_lowest_price',
-    'number_of_sellers',
-    'the_lowest_price'
-  ])
+  header.each do |row|
+    sheet.add_row row
+  end
 
   # body
   hist_items.each do |item|
-    sheet.add_row([
-      item.survey_date,
-      item.ranking,
-      item.new_sell_price.num_of_sellers,
-      item.new_sell_price.lowest_price,
-      item.used_sell_price.num_of_sellers,
-      item.used_sell_price.lowest_price,
-      item.coll_sell_price.num_of_sellers,
-      item.coll_sell_price.lowest_price
-    ])
+    sheet.add_row(item.to_array)
   end
 
   package.serialize(out_file)
+end
+
+def header
+  [
+    [
+      'survey_date',
+      'ranking',
+      'new',
+      '',
+      'uesed',
+      '',
+      'collectible',
+      ''
+    ],
+    [
+      '',
+      '',
+      'number_of_sellers',
+      'the_lowest_price',
+      'number_of_sellers',
+      'the_lowest_price',
+      'number_of_sellers',
+      'the_lowest_price'
+    ]
+  ]
 end
 
 class MultiLogger
@@ -204,10 +229,15 @@ result = {
 }
 in_str.split(/\n/).each do |line|
   asin = line.chomp
-  out_file = "#{out_dir}/#{asin}.xlsx"
   begin
     hist_data = get_hist_data(browser, asin)
-    write_to_excel(asin, hist_data, out_file)
+    if ARGV[0] == 'excel'
+      out_file = "#{out_dir}/#{asin}.xlsx"
+      write_to_excel(asin, hist_data, out_file)
+    else
+      out_file = "#{out_dir}/#{asin}.csv"
+      write_to_csv(asin, hist_data, out_file)
+    end
     result[:success] += 1
     logger.info("#{asin} successfull.")
   rescue NotFoundError => ex
