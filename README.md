@@ -5,11 +5,11 @@
 ### Rubyのインストール(Winddows 64bitのみ記載)
 
 - 以下サイトからRuby 2.1.7 (x64)をダウンロードします
--- http://rubyinstaller.org/downloads/
+ - http://rubyinstaller.org/downloads/
 
 - ダウンロードしたインストーラを起動しまうす。以下を参考にインストールを進めます
--- http://qiita.com/shimoju/items/41035b213ad0ac3a979e
--- Rubyの実行ファイルへ環境変数PATHを追加するのを忘れないようにします
+ - http://qiita.com/shimoju/items/41035b213ad0ac3a979e
+ - Rubyの実行ファイルへ環境変数PATHを追加するのを忘れないようにします
 
 ### アプリケーションのダウンロード
 
