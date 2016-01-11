@@ -26,10 +26,16 @@
 
 - command propmt(Windows)またはターミナル(MAC)を開きます
 
-- 以下コマンドを実行します
+- bundlerをインストールします。以下コマンドを実行します
 
 ```
 cd <インストールフォルダ>
+gem install bundler
+```
+
+- 必要ライブラリをインストールします。以下コマンドを実行します
+
+```
 bundle install
 ```
 
