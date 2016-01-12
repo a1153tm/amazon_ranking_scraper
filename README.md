@@ -51,14 +51,19 @@ chromedriver.exe をRubyインストールディレクトリのbin(ex C:¥Ruby21
 ### ASINの設定
 asin.txtにデータを取得するASINを記載します。
 
-### FirefoxでCSVに出力する場合
+### ChromeでCSVに出力する場合
 ```
 ruby scrape_mnrate.rb
 ```
 
-### ChromeでCSVに出力する場合
+### FirefoxでCSVに出力する場合
 ```
-ruby scrape_mnrate.rb chrome
+ruby scrape_mnrate.rb firefox
+```
+
+### FirefoxでChromeに出力する場合
+```
+ruby scrape_mnrate.rb chrome excel
 ```
 
 ### FirefoxでExcelに出力する場合
@@ -66,7 +71,3 @@ ruby scrape_mnrate.rb chrome
 ruby scrape_mnrate.rb firefox excel
 ```
 
-### FirefoxでChromeに出力する場合
-```
-ruby scrape_mnrate.rb chrome excel
-```

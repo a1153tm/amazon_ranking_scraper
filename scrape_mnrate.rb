@@ -230,7 +230,7 @@ end
 logger = MultiLogger.new("#{log_dir}/scrape_mnrate.log", 10)
 logger.info "============= scrape_mnrate started!! ============="
 
-app = ARGV[0].nil? ? :firefox : :chrome
+app = ARGV[0].nil? ? :chrome : :firefox
 browser = Browser.new app
 
 in_str = open("#{__dir__}/asin.txt") { |f| f.read.chomp }
