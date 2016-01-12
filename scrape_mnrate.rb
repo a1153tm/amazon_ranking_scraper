@@ -21,13 +21,13 @@ class Browser
       begin
         @driver.navigate.to url
         return yield @driver
+      rescue NotFoundError => ex
+        raise ex
       rescue SiteUnkownError => ex
         @logger.warn "#{i.ordinalize} try for #{url} failed." unless i == 1
         raise ex if i == @max_try
         wait_time = @wait_base_time * (2 ** (i-1))
         sleep wait_time
-      rescue NotFoundError => ex
-        raise ex
       rescue => ex
         quit()
         new_driver()
@@ -113,15 +113,17 @@ def get_hist_data(browser, asin)
   url = "http://us.mnrate.com/item/aid/#{asin}"
   data = nil
   browser.open(url) do |driver|
+    not_found = false
     begin
       unless page_not_found?(driver)
         data = get_hist_graph_data(driver)
       else
-        raise NotFoundError, "ASIN #{asin} not found." 
+        not_found = true
       end
     rescue => ex
       raise SiteUnkownError.new(ex)
     end
+      raise NotFoundError, "ASIN #{asin} not found." if not_found
   end
   data
 end
