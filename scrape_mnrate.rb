@@ -6,10 +6,11 @@ require 'selenium-webdriver'
 require 'logger'
  
 class Browser
-  def initialize(app)
+  def initialize(app, logger)
     @app = app
-    @max_try = 1
-    @interval = 10
+    @logger = logger
+    @max_try = 7
+    @wait_base_time = 20
     new_driver()
   end
 
@@ -21,8 +22,10 @@ class Browser
         @driver.navigate.to url
         return yield @driver
       rescue SiteUnkownError => ex
+        @logger.warn "#{i.ordinalize} try for #{url} failed." unless i == 1
         raise ex if i == @max_try
-        sleep @interval
+        wait_time = @wait_base_time * (2 ** (i-1))
+        sleep wait_time
       rescue NotFoundError => ex
         raise ex
       rescue => ex
@@ -45,6 +48,18 @@ class Browser
 
   def new_driver
     @driver = Selenium::WebDriver.for @app
+  end
+end
+
+class Integer
+  def ordinalize
+    suffix =
+      if (fd=abs%10).between?(1,3) && !abs.between?(11,13)
+        %w(_ st nd rd)[fd]
+      else
+        'th'
+      end
+    "#{self}" + suffix
   end
 end
 
@@ -98,9 +113,12 @@ def get_hist_data(browser, asin)
   url = "http://us.mnrate.com/item/aid/#{asin}"
   data = nil
   browser.open(url) do |driver|
-    raise NotFoundError, "ASIN #{asin} not found." if page_not_found?(driver)
     begin
-      data = get_hist_graph_data(driver)
+      unless page_not_found?(driver)
+        data = get_hist_graph_data(driver)
+      else
+        raise NotFoundError, "ASIN #{asin} not found." 
+      end
     rescue => ex
       raise SiteUnkownError.new(ex)
     end
@@ -231,7 +249,7 @@ logger = MultiLogger.new("#{log_dir}/scrape_mnrate.log", 10)
 logger.info "============= scrape_mnrate started!! ============="
 
 app = ARGV[0].nil? ? :chrome : :firefox
-browser = Browser.new app
+browser = Browser.new app, logger
 
 in_str = open("#{__dir__}/asin.txt") { |f| f.read.chomp }
 result = {
