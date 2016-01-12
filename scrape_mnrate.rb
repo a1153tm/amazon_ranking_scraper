@@ -131,7 +131,8 @@ end
 def page_not_found?(driver)
   main = driver.find_element(:tag_name, 'main')
   section_text = main.find_element(:tag_name, 'section').text.chomp.strip
-  section_text == "指定された商品情報が存在しませんでした。"
+  section_text == "指定された商品情報が存在しませんでした。" or
+    section_text == "There was no information about the product you selected."
 end
 
 def get_hist_graph_data(driver)
