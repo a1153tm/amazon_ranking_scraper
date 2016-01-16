@@ -1,0 +1,4 @@
+browser: "chrome"
+format: "csv"
+max_try: 8
+wait_time_base: 20

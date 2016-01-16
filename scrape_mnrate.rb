@@ -3,14 +3,15 @@
 require 'axlsx'
 require 'csv'
 require 'selenium-webdriver'
+require 'yaml'
 require 'logger'
  
 class Browser
-  def initialize(app, logger)
-    @app = app
+  def initialize(config, logger)
+    @app = config['browser'].to_sym
+    @max_try = config['max_try']
+    @wait_time_base = config['wait_time_base']
     @logger = logger
-    @max_try = 7
-    @wait_base_time = 20
     new_driver()
   end
 
@@ -26,7 +27,7 @@ class Browser
       rescue SiteUnkownError => ex
         @logger.warn "#{i.ordinalize} try for #{url} failed." unless i == 1
         raise ex if i == @max_try
-        wait_time = @wait_base_time * (2 ** (i-1))
+        wait_time = @wait_time_base * (2 ** (i-1))
         sleep wait_time
       rescue => ex
         quit()
@@ -248,11 +249,13 @@ log_dir = "#{__dir__}/log"
 [out_dir, log_dir].each do |dir|
   Dir.mkdir dir unless Dir.exist? dir
 end
+
 logger = MultiLogger.new("#{log_dir}/scrape_mnrate.log", 10)
 logger.info "============= scrape_mnrate started!! ============="
 
-app = ARGV[0].nil? ? :chrome : :firefox
-browser = Browser.new app, logger
+config = YAML.load_file("config.yml")
+
+browser = Browser.new config, logger
 
 in_str = open("#{__dir__}/asin.txt") { |f| f.read.chomp }
 result = {
@@ -264,7 +267,7 @@ in_str.split(/\n/).each do |line|
   asin = line.chomp
   begin
     hist_data = get_hist_data(browser, asin)
-    if ARGV[1] == 'excel'
+    if config['format'] == 'excel'
       out_file = "#{out_dir}/#{asin}.xlsx"
       write_to_excel(asin, hist_data, out_file)
     else
