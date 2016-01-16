@@ -290,6 +290,7 @@ in_str.split(/\n/).each do |line|
   end
 end
 
+recovered = []
 result[:error].each do |asin|
   logger.info("Last try for #{asin}.")
   begin
@@ -301,8 +302,7 @@ result[:error].each do |asin|
       out_file = "#{out_dir}/#{asin}.csv"
       write_to_csv(asin, hist_data, out_file)
     end
-    result[:success] << asin
-    result[:error].delete asin
+    recovered << asin
     logger.info("#{asin} successfull.")
   rescue SiteUnkownError => ex
       logger.error("#{asin} failed.")
@@ -311,8 +311,13 @@ result[:error].each do |asin|
   end
 end
 
+recovered.each do |asin|
+  result[:success] << asin
+  result[:error].delete asin
+end
+
 browser.quit
 
 logger.info "============= scrape_mnrate finished!! ============"
-p result
 logger.info result.map {|s, asin| "#{s}: #{asin.size}"}.join(", ")
+

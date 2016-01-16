@@ -1,4 +1,13 @@
+# 使用するブラウザ. "chrome" or "filrefox"
 browser: "chrome"
+
+# 出力フォーマット. "csv" or "excel"
 format: "csv"
+
+# 最大リクエスト回数
 max_try: 8
+
+# 基本待ち時間(sec).
+# 実際の待ち時間は 20sec × (リクエスト回数 - 1)の二乗 となる
+# 20sec, 40sec, 80sec, 160sec,...,2560
 wait_time_base: 20
