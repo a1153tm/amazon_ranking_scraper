@@ -121,7 +121,6 @@ def get_hist_data(browser, asin)
         8.times.each do |i|
           sleep 1.5
           data = get_hist_graph_data(driver)
-          data = []
           break unless data.empty?
         end
       else
