@@ -146,7 +146,6 @@ def get_hist_data(browser, asin)
           sleep 1.5 * (i + 1)
           data = get_hist_graph_data(driver)
           break unless data.empty?
-          puts "refresh!!!"
           driver.refresh
         end
       else
