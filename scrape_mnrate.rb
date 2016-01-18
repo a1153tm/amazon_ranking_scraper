@@ -88,10 +88,30 @@ class SellerAndPrice
   attr_accessor :num_of_sellers, :lowest_price
 end
 
-class NotFoundError < StandardError
+class Warn < StandardError
+  def initialize(asin)
+    @asin = asin
+  end
+
+  def to_s
+    @asin
+  end
+
+  def ==(asin)
+    @asin <=> asin
+  end
 end
 
-class EmptyError < StandardError
+class NotFoundWarn < Warn
+  def to_msg
+    "#{@asin} (not found)"
+  end
+end
+
+class EmptyWarn < Warn
+  def to_msg
+    "#{@asin} (empty)"
+  end
 end
 
 class SiteUnkownError < StandardError
@@ -130,8 +150,8 @@ def get_hist_data(browser, asin)
       raise SiteUnkownError.new(ex)
     end
   end
-  raise NotFoundError if not_found
-  raise EmptyError if data.empty?
+  raise NotFoundWarn.new(asin) if not_found
+  raise EmptyWarn.new(asin) if data.empty?
   data
 end
 
@@ -282,11 +302,11 @@ in_str.split(/\n/).each do |line|
     end
     result[:success] << asin
     logger.info("#{asin} successfull.")
-  rescue NotFoundError => ex
-    result[:warning] << "#{asin} (not found)"
+  rescue NotFoundWarn => ex
+    result[:warning] << ex
     logger.warn("#{asin} not found.")
-  rescue EmptyError => ex
-    result[:warning] << "#{asin} (empty)"
+  rescue EmptyWarn => ex
+    result[:warning] << ex
     logger.warn("#{asin} is empty.")
   rescue => ex
     logger.error("#{asin} failed.")
@@ -300,7 +320,7 @@ in_str.split(/\n/).each do |line|
 end
 
 recovered = []
-result[:error].each do |asin|
+(result[:error] + result[:warning].map {|w| w.to_s}).each do |asin|
   logger.info("Last try for #{asin}.")
   begin
     hist_data = get_hist_data(browser, asin)
@@ -313,6 +333,10 @@ result[:error].each do |asin|
     end
     recovered << asin
     logger.info("#{asin} successfull.")
+  rescue NotFoundWarn => ex
+    logger.warn("#{asin} not found.")
+  rescue EmptyWarn => ex
+    logger.warn("#{asin} is empty.")
   rescue SiteUnkownError => ex
       logger.error("#{asin} failed.")
       logger.error(ex.to_s)
@@ -322,6 +346,7 @@ end
 
 recovered.each do |asin|
   result[:success] << asin
+  result[:warning].delete asin
   result[:error].delete asin
 end
 
@@ -330,8 +355,9 @@ browser.quit
 logger.info "============= scrape_mnrate finished!! ============"
 logger.info result.map {|s, asins| "#{s}: #{asins.size}"}.join(", ")
 unless result[:warning].empty?
-  logger.info "warnings:\n" + result[:warning].join("\n")
+  logger.info "warnings:\n" + result[:warning].map {|w| w.to_msg}.join("\n")
 end
 unless result[:error].empty?
   logger.info "errors\n" + result[:error].join("\n")
 end
+
