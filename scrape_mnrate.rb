@@ -22,8 +22,6 @@ class Browser
       begin
         @driver.navigate.to url
         return yield @driver
-      rescue NotFoundError => ex
-        raise ex
       rescue SiteUnkownError => ex
         @logger.warn "#{i.ordinalize} try for #{url} failed." unless i == 1
         raise ex if i == @max_try
@@ -93,6 +91,9 @@ end
 class NotFoundError < StandardError
 end
 
+class EmptyError < StandardError
+end
+
 class SiteUnkownError < StandardError
   def initialize(org_ex)
     super 'Unkwon site error occuered.'
@@ -113,19 +114,25 @@ end
 def get_hist_data(browser, asin)
   url = "http://us.mnrate.com/item/aid/#{asin}"
   data = nil
+  not_found = false
   browser.open(url) do |driver|
-    not_found = false
     begin
       unless page_not_found?(driver)
-        data = get_hist_graph_data(driver)
+        8.times.each do |i|
+          sleep 1.5
+          data = get_hist_graph_data(driver)
+          data = []
+          break unless data.empty?
+        end
       else
         not_found = true
       end
     rescue => ex
       raise SiteUnkownError.new(ex)
     end
-      raise NotFoundError, "ASIN #{asin} not found." if not_found
   end
+  raise NotFoundError if not_found
+  raise EmptyError if data.empty?
   data
 end
 
@@ -156,7 +163,7 @@ def get_hist_graph_data(driver)
 EOS
 
   rows = driver.execute_script script
-  return rows.map do |row|
+  rows.map do |row|
     item = HistItem.new
     item.survey_date = row['w_res'].sub(/^＞/, '')
     item.ranking = row['w_ran']
@@ -168,7 +175,6 @@ EOS
     item.coll_sell_price.lowest_price = row['w_col']
     item
   end
-  #hist_items
 end
 
 def get_col_text(hist_row, _class)
@@ -263,6 +269,7 @@ result = {
   warning: [],
   error: []
 }
+
 in_str.split(/\n/).each do |line|
   asin = line.chomp
   begin
@@ -277,8 +284,11 @@ in_str.split(/\n/).each do |line|
     result[:success] << asin
     logger.info("#{asin} successfull.")
   rescue NotFoundError => ex
-    result[:warning] << asin
-    logger.warn("#{asin} #{ex.message}")
+    result[:warning] << "#{asin} (not found)"
+    logger.warn("#{asin} not found.")
+  rescue EmptyError => ex
+    result[:warning] << "#{asin} (empty)"
+    logger.warn("#{asin} is empty.")
   rescue => ex
     logger.error("#{asin} failed.")
     logger.error(ex.to_s)
@@ -319,5 +329,10 @@ end
 browser.quit
 
 logger.info "============= scrape_mnrate finished!! ============"
-logger.info result.map {|s, asin| "#{s}: #{asin.size}"}.join(", ")
-
+logger.info result.map {|s, asins| "#{s}: #{asins.size}"}.join(", ")
+unless result[:warning].empty?
+  logger.info "warnings:\n" + result[:warning].join("\n")
+end
+unless result[:error].empty?
+  logger.info "errors\n" + result[:error].join("\n")
+end
