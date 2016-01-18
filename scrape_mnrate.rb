@@ -43,10 +43,6 @@ class Browser
     @driver.save_screenshot(path)
   end
 
-  def refresh
-    @driver.refresh
-  end
-
   private
 
   def new_driver
@@ -146,7 +142,7 @@ def get_hist_data(browser, asin)
           sleep 1.5 * (i + 1)
           data = get_hist_graph_data(driver)
           break unless data.empty?
-          driver.refresh
+          driver.navigate.refresh
         end
       else
         not_found = true
