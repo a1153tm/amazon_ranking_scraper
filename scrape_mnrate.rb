@@ -43,6 +43,10 @@ class Browser
     @driver.save_screenshot(path)
   end
 
+  def refresh
+    @driver.refresh
+  end
+
   private
 
   def new_driver
@@ -138,10 +142,12 @@ def get_hist_data(browser, asin)
   browser.open(url) do |driver|
     begin
       unless page_not_found?(driver)
-        8.times.each do |i|
-          sleep 1.5
+        5.times.each do |i|
+          sleep 1.5 * (i + 1)
           data = get_hist_graph_data(driver)
           break unless data.empty?
+          puts "refresh!!!"
+          driver.refresh
         end
       else
         not_found = true
@@ -320,7 +326,7 @@ in_str.split(/\n/).each do |line|
 end
 
 recovered = []
-(result[:error] + result[:warning].map {|w| w.to_s}).each do |asin|
+(result[:error] + result[:warning].select {|w| w.is_a? EmptyWarn}.map {|w| w.to_s}).each do |asin|
   logger.info("Last try for #{asin}.")
   begin
     hist_data = get_hist_data(browser, asin)
