@@ -347,7 +347,7 @@ end
 
 recovered.each do |asin|
   result[:success] << asin
-  result[:warning].delete asin
+  result[:warning].delete_if { |w| w.to_s == asin }
   result[:error].delete asin
 end
 
