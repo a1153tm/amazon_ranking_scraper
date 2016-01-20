@@ -52,7 +52,23 @@ chromedriver.exe をRubyインストールディレクトリのbin(ex C:¥Ruby21
 asin.txtにデータを取得するASINを記載します。
 
 ### ブラウザ、出力フォーマット、待ち時間の設定
-config.ymlを適宜書き換えます。 詳細はconfig.ymlのコメントを参照
+config.ymlを適宜書き換えます。 詳細はconfig.ymlのコメントを参照。
+
+```
+# 使用するブラウザ. "chrome" or "filrefox"
+browser: "chrome"
+
+# 出力フォーマット. "txt" or "csv" or "excel"
+format: "txt"
+
+# 最大リクエスト回数
+max_try: 8
+
+# 基本待ち時間(sec).
+# 実際の待ち時間は 20sec × (リクエスト回数 - 1)の2乗 となる
+# 20sec, 40sec, 80sec, 160sec,...,2560
+wait_time_base: 20
+```
 
 ### 実行コマンド
 ```
