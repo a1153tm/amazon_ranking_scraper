@@ -140,7 +140,10 @@ def get_hist_data(browser, base_url, asin)
       unless page_not_found?(driver)
         5.times.each do |i|
           sleep 1.5 * (i + 1)
-          data = get_hist_graph_data(driver)
+          data = {
+            hist: get_hist_graph_data(driver),
+            name_asin: [get_name(driver), asin]
+          }
           break unless data.empty?
           driver.navigate.refresh
         end
@@ -197,23 +200,28 @@ EOS
   end
 end
 
-def get_col_text(hist_row, _class)
-  hist_row.find_element(:class, _class).find_element(:tag_name, 'span').text.chomp.strip
+def get_name(driver)
+  driver.find_element(:id, '_sheet_item_title').text
 end
 
-def write_to_csv(asin, hist_items, out_file, delimeter = ",")
+def write_to_csv(asin, hist_data, out_file, delimeter = ",")
   CSV.open(out_file, 'w', :col_sep => delimeter) do |csv|
-    header.each do |row|
-      csv << row
+    header.each_with_index do |row, i|
+      if i == 0
+      then csv << row + hist_data[:name_asin]
+      else csv << row
+      end
     end
      
-    hist_items.each do |item|
+    hist_data[:hist].each do |item|
       csv << item.to_array
     end
   end
 end
 
-def write_to_excel(asin, hist_items, out_file)
+def write_to_excel(asin, hist_data, out_file)
+  hist_items = hist_data[:hist]
+
   package = Axlsx::Package.new                             
   sheet = package.workbook.add_worksheet(name: asin)
 
