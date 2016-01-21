@@ -188,7 +188,7 @@ def get_hist_graph_data(driver)
   var items = [];
   for (var i = 0; i < rows.length; i++){
     var item = {};
-    ['w_res', 'w_ran', 'w_tnew', 'w_tuse', 'w_new', 'w_tuse', 'w_tcol', 'w_col'].forEach(function(klass) {
+    ['w_res', 'w_ran', 'w_tnew', 'w_tuse', 'w_new', 'w_use', 'w_tcol', 'w_col'].forEach(function(klass) {
       var value = rows[i].querySelector('.' + klass).querySelector('span').textContent;
       item[klass] = value;
     });
@@ -226,8 +226,14 @@ def write_to_csv(asin, hist_data, out_file, delimeter = ",")
     end
      
     hist_data[:hist].each do |item|
-      csv << item.to_array
+      csv << item.to_array.encode_to_sjis
     end
+  end
+end
+
+class Array
+  def encode_to_sjis
+    self.map { |elm| elm.is_a?(String) ? elm.encode("Shift_JIS") : elm }
   end
 end
 
