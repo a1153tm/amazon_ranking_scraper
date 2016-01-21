@@ -131,8 +131,8 @@ class SiteUnkownError < StandardError
   end
 end
 
-def get_hist_data(browser, asin)
-  url = "http://us.mnrate.com/item/aid/#{asin}"
+def get_hist_data(browser, base_url, asin)
+  url = "#{base_url}/#{asin}"
   data = nil
   not_found = false
   browser.open(url) do |driver|
@@ -201,8 +201,8 @@ def get_col_text(hist_row, _class)
   hist_row.find_element(:class, _class).find_element(:tag_name, 'span').text.chomp.strip
 end
 
-def write_to_csv(asin, hist_items, out_file)
-  CSV.open(out_file, 'w') do |csv|
+def write_to_csv(asin, hist_items, out_file, delimeter = ",")
+  CSV.open(out_file, 'w', :col_sep => delimeter) do |csv|
     header.each do |row|
       csv << row
     end
