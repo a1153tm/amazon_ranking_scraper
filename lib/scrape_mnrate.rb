@@ -220,7 +220,7 @@ def write_to_csv(asin, hist_data, out_file, delimeter = ",")
   CSV.open(out_file, 'w', :col_sep => delimeter) do |csv|
     header.each_with_index do |row, i|
       if i == 0
-      then csv << row + hist_data[:name_asin]
+      then csv << row + hist_data[:name_asin].encode_to_sjis
       else csv << row
       end
     end
@@ -283,10 +283,19 @@ end
 
 def concatinate_out_files(asins, out_dir, ext)
   out_file = "#{out_dir}/all_asin.#{ext}"
-  open(out_file, 'w') do |of|
-    asins.each do |asin|
-      in_file = "#{out_dir}/#{asin}.#{ext}"
-      of.write open(in_file) {|_if| _if.read}
+  col_sep = ext == 'txt' ? "\t" : ","
+  CSV.open(out_file, 'w') do |of|
+    asins.each_with_index do |asin, i|
+      rows = CSV.open("#{out_dir}/#{asin}.#{ext}", 'r', {encoding: 'SJIS', col_sep: col_sep})
+      name = nil
+      rows.each_with_index do |row, j|
+        if j == 0
+          name = row[8]
+        elsif j == 1
+        else
+          of << [name, asin] + row
+        end
+      end
     end
   end
 end
