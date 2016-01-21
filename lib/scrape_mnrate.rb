@@ -131,6 +131,18 @@ class SiteUnkownError < StandardError
   end
 end
 
+class MultiLogger
+  def initialize(log_path, num)
+    @file_logger = Logger.new(log_path, num)
+    @stdout_logger = Logger.new(STDOUT)
+  end
+
+  def method_missing(name, *args)
+    @file_logger.send name, *args
+    @stdout_logger.send name, *args
+  end
+end
+
 def get_hist_data(browser, base_url, asin)
   url = "#{base_url}/#{asin}"
   data = nil
@@ -263,15 +275,12 @@ def header
   ]
 end
 
-class MultiLogger
-  def initialize(log_path, num)
-    @file_logger = Logger.new(log_path, num)
-    @stdout_logger = Logger.new(STDOUT)
-  end
-
-  def method_missing(name, *args)
-    @file_logger.send name, *args
-    @stdout_logger.send name, *args
+def concatinate_out_files(asins, out_dir, ext)
+  out_file = "#{out_dir}/all_asin.#{ext}"
+  open(out_file, 'w') do |of|
+    asins.each do |asin|
+      in_file = "#{out_dir}/#{asin}.#{ext}"
+      of.write open(in_file) {|_if| _if.read}
+    end
   end
 end
-

@@ -99,6 +99,8 @@ end
 
 browser.quit
 
+concatinate_out_files result[:success], out_dir, config['format']
+
 logger.info "============= #{base_name} finished!! ============"
 logger.info result.map {|s, asins| "#{s}: #{asins.size}"}.join(", ")
 unless result[:warning].empty?
