@@ -233,7 +233,7 @@ end
 
 class Array
   def encode_to_sjis
-    self.map { |elm| elm.is_a?(String) ? elm.sjisable.encode("Shift_JIS") : elm }
+    self.map { |elm| elm.is_a?(String) ? elm.sjisable.encode("Windows-31J") : elm }
   end
 end
 
@@ -300,7 +300,7 @@ def concatinate_out_files(asins, out_dir, ext)
   col_sep = ext == 'txt' ? "\t" : ","
   CSV.open(out_file, 'w') do |of|
     asins.each_with_index do |asin, i|
-      rows = CSV.open("#{out_dir}/#{asin}.#{ext}", 'r', {encoding: 'SJIS', col_sep: col_sep})
+      rows = CSV.open("#{out_dir}/#{asin}.#{ext}", 'r', {encoding: 'Windows-31J', col_sep: col_sep})
       name = nil
       rows.each_with_index do |row, j|
         if j == 0
