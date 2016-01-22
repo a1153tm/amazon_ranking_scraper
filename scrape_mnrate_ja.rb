@@ -58,7 +58,13 @@ in_str.split(/\n/).each do |line|
     logger.error(ex.backtrace.join("\n"))
     result[:error] << asin
     if ex.is_a? SiteUnkownError
-      browser.save_screenshot "#{log_dir}/#{asin}.png"
+      begin
+        browser.save_screenshot "#{log_dir}/#{asin}.png"
+      rescue => ex
+        logger.error(ex)
+        logger.error(ex.to_s)
+        logger.error(ex.backtrace.join("\n"))
+      end
     end
   end
 end
