@@ -48,14 +48,14 @@ chromedriver.exe をRubyインストールディレクトリのbin(ex C:¥Ruby21
 
 ## 実行方法
 
-以下、US版、日本版をあわせて説明するため<us|ja>と表記します。
+以下、US版、日本版をあわせて説明するためus|jaと表記します。
 usはUS版、jaは日本版を表します。
 
 ### ASINの設定
-asin_<us|ja>.txtにデータを取得するASINを記載します。
+asin_us|ja.txtにデータを取得するASINを記載します。
 
 ### ブラウザ、出力フォーマット、待ち時間の設定
-config_<us|ja>.ymlを適宜書き換えます。 詳細はconfig_<us|ja>.ymlのコメントを参照。
+config_us|ja.ymlを適宜書き換えます。 詳細はconfig_us|ja.ymlのコメントを参照。
 
 ```
 # 使用するブラウザ. "chrome" or "filrefox"
@@ -75,6 +75,6 @@ wait_time_base: 20
 
 ### 実行コマンド
 ```
-ruby scrape_mnrate_<us|ja>.rb
+ruby scrape_mnrate_us|ja.rb
 ```
 
