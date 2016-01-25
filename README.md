@@ -64,6 +64,9 @@ browser: "chrome"
 # 出力フォーマット. "txt" or "csv" or "excel"
 format: "csv"
 
+# 一回ごとのリクエスト待ち時間(sec)
+each_wait_time: 1.5
+
 # 最大リクエスト回数
 max_try: 8
 
