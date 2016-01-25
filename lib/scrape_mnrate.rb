@@ -143,7 +143,7 @@ class MultiLogger
   end
 end
 
-def get_hist_data(browser, base_url, asin)
+def get_hist_data(browser, base_url, asin, each_wait_time)
   url = "#{base_url}/#{asin}"
   data = nil
   not_found = false
@@ -151,7 +151,7 @@ def get_hist_data(browser, base_url, asin)
     begin
       unless page_not_found?(driver)
         5.times.each do |i|
-          sleep 1.5 * (i + 1)
+          sleep each_wait_time * (i + 1)
           data = {
             hist: get_hist_graph_data(driver),
             name_asin: [get_name(driver), asin]

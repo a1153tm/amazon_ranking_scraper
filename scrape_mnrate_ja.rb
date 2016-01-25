@@ -29,11 +29,12 @@ result = {
 }
 
 base_url = config['base_url']
+each_wait_time = config['each_wait_time']
 
 in_str.split(/\n/).each do |line|
   asin = line.chomp
   begin
-    hist_data = get_hist_data(browser, base_url, asin)
+    hist_data = get_hist_data(browser, base_url, asin, each_wait_time)
     if config['format'] == 'excel'
       out_file = "#{out_dir}/#{asin}.xlsx"
       write_to_excel(asin, hist_data, out_file)
@@ -73,7 +74,7 @@ recovered = []
 (result[:error] + result[:warning].select {|w| w.is_a? EmptyWarn}.map {|w| w.to_s}).each do |asin|
   logger.info("Last try for #{asin}.")
   begin
-    hist_data = get_hist_data(browser, base_url, asin)
+    hist_data = get_hist_data(browser, base_url, asin, each_wait_time)
     if config['format'] == 'excel'
       out_file = "#{out_dir}/#{asin}.xlsx"
       write_to_excel(asin, hist_data, out_file)
